@@ -1,0 +1,4 @@
+- Curvature at each point - Menger curvature
+- Speed cap at each point - use lateral limits and speed limits
+- Account for acceleration and deceleration - use deceleration and acceleration limits
+- Calculate total time of Lap - calculus :(
