@@ -3,6 +3,20 @@
 - Account for acceleration and deceleration - use deceleration and acceleration limits
 - Calculate total time of Lap - calculus :(
 
+########## STEPS ################
+
+vehicle_model.py - create an abstracted/modular way of getting acceleration or grip limits, to act as the current vehicle capability model (DONE)
+
+path_geometry.py - find distance between 2 points, be able to keep track of cumulative distance, and calculate the curvature of the path
+
+
+
+
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 keywords:
 
