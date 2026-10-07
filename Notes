@@ -2,3 +2,48 @@
 - Speed cap at each point - use lateral limits and speed limits
 - Account for acceleration and deceleration - use deceleration and acceleration limits
 - Calculate total time of Lap - calculus :(
+
+
+keywords:
+
+TOTG - time-optimal trajectory generation
+Motion profiling - (s curve, trapezoidal) - finding speeds with given constraints
+velocity limit curve / admissible velocity - explains how curvature limits max speed at any point
+banga's algorithm , kunz & stilman algorithm - famous algorithms for time optimal path parameterisation
+
+geometric limits - lateral acceleration limits , max V = sqrt(Max lateral acceleration x radius of curvature)
+kinematic limits (linear) - hard limits on top end speed (Vmax) and max acceleration/braking (Amax)
+
+actually solving:
+Forward-Backward integration (Classical approach):
+	you have a forward pass - start at beginning of path, accelerate as hard as possible respecting curvature limits
+	then a backwards pass - start at end of path, work backwards decelerating as hard as possible
+	minimum merge - at each point along the path, take the lowest speed from forward pass, backward pass and geometric curve limit (also max speed)
+
+for better modelled tyre limits, use 'GG Diagram envelope'
+
+S-Curve / trapezoidal profiles:
+with a straight line or simple segments, reduce complexity:
+trapezoidal path - assume instant acceleration, speed goes up linearly, flats out at max speed, the steps down linearly
+s-curve - bounds jerk (rate of change of acceleration) creating s shaped velocity curve
+
+libraries and code examples:
+ROS2 - look up documentation for nav2_smoother or time optimal trajectory generation tutorials in MoveIt
+WPILib - great documentation on TrapezoidProfile and swerve Drive Kinematics constraints
+
+already made software:
+offline calculation for a predefined track:
+OpenLap - lap time simulator with forward-backward integration with predefined track -> optimal velocity and acceleration profiles
+Pacejka Magic Formula - for tyre modelling, finding true acceleration limits:
+
+real time planning:
+global planner part - mapping cones and updating path
+local planner part - following path safely and at speed
+
+Model predictive control - industry standard real time tracking, handles constraints whilst deciding control inputs
+kinematic bicycle model - useful model to start with
+model predictive contouring control - advanced model used by zurich driverless team
+AMZ driverless autonomous racing - great zurich paper
+MIT team apparently have lots of older open source stuff
+
+minimum curvature path - for making a geometric racing line
