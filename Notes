@@ -3,6 +3,10 @@
 - Account for acceleration and deceleration - use deceleration and acceleration limits
 - Calculate total time of Lap - calculus :(
 
+-Delauney - create track without cone colours
+-Racing line lap 2 onwards, lap 1 is information gathering
+
+
 ########## STEPS ################
 
 vehicle_model.py - create an abstracted/modular way of getting acceleration or grip limits, to act as the current vehicle capability model (DONE)
