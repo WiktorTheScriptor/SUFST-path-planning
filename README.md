@@ -37,18 +37,58 @@ there will be 3 state pipelines as mentioned in the overview section, for the ex
 in general, this Path planning module will be taking in vehicle kinematics data (x, y, heading, longitudinal velocity, lateral/sideways velocity, yaw rate) and cone map, which will be a list of cones: (cone id, x, y, colour, covariance matrix, confidence value), which will be provided by the State Estimation / Localisation module.  
 This module's output is a spline trajectory section of the planned path (typically 1.5s ahead), as a list of waypoints: (x, y, heading, target velocity, curvature, timestamp), which will be used by the Control module.
 
-### State 1: Exploration
-...
+### State 1: Exploration  
+```
+input (cone map array) - snapshot of dynamically changing array (cone id, x, y, colour, covariance matrix, confidence), received and handled by ROS2 wrapper script
+        |                also take a timestamp of the time the data was read by this ROS2 node, or have state estimation/localisation provide this value.
+        |                hand this off to a 'main' script, that imports, calls and handles passing data between the following modules:
+        |  
+    (confidence gating) - filter out low confidence landmarks/cones using set threshold  
+        |  
+    (covariance inflation) - artificially increase cone radius using covariance matrix, use to shift cone coordinate towards centre of track  
+        |                    allows using far away cones safely by artificially narrowing uncertain track boundary  
+        |-pruned cone map  
+        |       
+        |    input (vehicle kinematics data) - (x, y, yaw, longitudinal velocity, lateral velocity, yaw rate)  
+        |            |  
+    (Homogenous transform) - transform & rotate global cone coordinates into car coordinate frame (probably use NumPy package)
+        |                    use vehicle kinematics for position & yaw etc
+    (Wedge slicing) - truncate cone array to only include points a certain distance ahead (based on speed), 
+        |             to the sides and at a certain FOV angle. the distance ahead has to be greater than the spline distance used later
+        |
+    (Delaunay triangulation) - (most computationally intense so depends heavily on cone amount) used to generate non-overlapping
+        |                      triangles for all the points. might need anchor/seed node with latency calculation
+    (   edge filtering  ) - only accept triangle edges between different coloured cones
+    (midpoint extraction) - find centre of accepted edges to create list of centreline points
+        |
+        |-jagged centreline point path
+        |
+    (latency prediction/kinematic continuity) - use bicycle model to find actual current car position since data was received
+        |                                       by using the timestamp from earlier. also possibly calculate the downstream delay (more useful for race laps)
+        |-jagged centreline path and node0 (x,y)
+        |      input (vehicle kinematic data)
+        |                |
+    (kinematic side slip compensation) - Beta = arctan(lateral velocity / longitudinal velocity) = arctan(vy/vx), modifies initial heading angle for spline (car heading + Beta) (might not need for lap 1?)
+    (   curvature spline constraint  ) - curvature = yaw rate / longitudinal velocity (vx) . used as initial 2nd derivative boundary condition for spline to stop sudden steering changes
+        |
+        |-jagged centreline path, complete node0
+        |
+    (spline calculation with) - uses all the centreline points to generate the spline curve, then generates the path points up to a certain distance (speed dependent for 1.5-2s of path?)
+    (   scaled look ahead   )   which chops off the inaccurate wobbly end of the curve. (thats why more centre points/cone distance needed than spline distance generated)
+        |
+    (output to Control module) - as spline trajectory section, as a list of waypoints (x, y, heading, target velocity) target velocity could be kept low/constant on first lap.
+                                 possibly output curvature and timestamp data later too, maybe not needed. handed off to ROS2 wrapper script, which deals with handing this off.
+```
 ### State 2: Racing
-...
+...figure out how to receive state change notification or find it internally. this stage uses a fixed/frozen map of cones, calculating a full racing path to aim for at the start of the lap once?
 ### State 3: Recovery
-...
+...will be similar to state 1, not priority yet
 
 ## Repository Structure
 to be decided later, but should have the ROS2 wrapper script top level, with a subdirectory (python package) containing separate python files for each main pipeline step?
 
 ## TODO:
-- [ ] Finish readme state specifications (focus on states 1 & 2)
+- [ ] Finish readme state specifications (focus on states 1 & 2) , propose any changes
 - [ ] start implementing state 1 code
 - [ ] communicate with State Estimation / Localisation and Control to confirm data formats
 - [ ] write some tests for the implemented code/modules
