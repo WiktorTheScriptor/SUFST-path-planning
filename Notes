@@ -12,3 +12,13 @@
 - Speeds -> give each waypoint a target speed capped by the waypoints curvature 
 - validate -> reject a path that leaves the track or curves too much
 - output -> waypoints with speeds
+
+
+waypoints = np.array([
+    [0, 0], [10, 0], [20, 0], [30, 2], [38, 6],   # entry and gentle right
+    [42, 14], [38, 22], [30, 26],                   # tight hairpin
+    [20, 26], [14, 22], [8, 24], [2, 28],           # chicane (left-right)
+    [-4, 34], [-4, 44], [2, 50], [12, 52],          # sweeping left
+    [22, 50], [28, 42], [26, 34], [20, 30],         # S-bend back
+    [12, 28], [4, 20], [0, 10], [0, 0],             # return to start
+]) 
